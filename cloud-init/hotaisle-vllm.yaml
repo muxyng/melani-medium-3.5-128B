@@ -16,7 +16,7 @@ system_info:
     groups: [docker]
 
 write_files:
-  - path: /opt/hotaisle-melani-medium-bootstrap/README.next
+  - path: /opt/hotaisle-melani-medium-bootstrap/NEXT_STEPS.txt
     permissions: "0644"
     content: |
       Bootstrap complete.
@@ -42,7 +42,6 @@ runcmd:
       git -C /opt/melani-medium-3.5-128B pull --ff-only
     fi
   - cp /opt/melani-medium-3.5-128B/.env.example /opt/melani-medium-3.5-128B/.env.pending
-  - cp /opt/hotaisle-melani-medium-bootstrap/README.next /opt/melani-medium-3.5-128B/README.next
   - chmod 600 /opt/melani-medium-3.5-128B/.env.pending
   - echo "Hot Aisle bootstrap finished at $(date -Is)" > /opt/melani-medium-3.5-128B/bootstrap.done
 
