@@ -7,7 +7,7 @@ GPU_MODEL="${GPU_MODEL:-MI300X}"
 CPU_CORES="${CPU_CORES:-13}"
 RAM_GB="${RAM_GB:-224}"
 DISK_GB="${DISK_GB:-13000}"
-USER_DATA_URL="${USER_DATA_URL:-https://raw.githubusercontent.com/muxyng/melani-medium-3.5-128B/main/cloud-init/hotaisle-vllm.yaml}"
+USER_DATA_URL="${USER_DATA_URL:-https://raw.githubusercontent.com/muxyng/melani-medium-3.5-128b/main/cloud-init/hotaisle-vllm.yaml}"
 
 if ! command -v hotaisle >/dev/null 2>&1; then
   echo "hotaisle CLI is not installed or not on PATH" >&2

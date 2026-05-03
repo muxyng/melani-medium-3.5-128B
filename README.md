@@ -78,6 +78,12 @@ GPU_COUNT=2 CPU_CORES=26 RAM_GB=448 ./scripts/hotaisle-provision-vm.sh
 
 The cloud-init bootstrap intentionally does not start vLLM or download model weights. It installs Docker tooling, clones this repo to `/opt/melani-medium-3.5-128B`, and leaves `/opt/melani-medium-3.5-128B/.env.pending` for secret configuration.
 
+Default cloud-init URL:
+
+```text
+https://raw.githubusercontent.com/muxyng/melani-medium-3.5-128b/main/cloud-init/hotaisle-vllm.yaml
+```
+
 ## Deployment
 
 On the deployment host:
