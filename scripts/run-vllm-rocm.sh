@@ -5,6 +5,10 @@ if [[ -z "${HF_TOKEN:-}" ]]; then
   echo "HF_TOKEN is required and must have access to mistralai/Mistral-Medium-3.5-128B" >&2
   exit 1
 fi
+if [[ -z "${VLLM_API_KEY:-}" ]]; then
+  echo "VLLM_API_KEY is required for the public OpenAI-compatible API" >&2
+  exit 1
+fi
 
 VLLM_IMAGE="${VLLM_IMAGE:-vllm/vllm-openai-rocm:nightly}"
 MODEL_ID="${MODEL_ID:-mistralai/Mistral-Medium-3.5-128B}"
@@ -41,6 +45,7 @@ docker run --rm --pull always \
   "${VLLM_IMAGE}" \
   --host 0.0.0.0 \
   --port 8000 \
+  --api-key "${VLLM_API_KEY}" \
   --model "${MODEL_ID}" \
   --served-model-name "${SERVED_MODEL_NAME}" \
   --download-dir /models/huggingface \

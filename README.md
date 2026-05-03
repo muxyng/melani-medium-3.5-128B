@@ -95,6 +95,8 @@ $EDITOR .env
 
 Set `HF_TOKEN` to a Hugging Face token with read access to the model. Make sure the model access terms have been accepted on the Hugging Face model page for that account.
 
+Set `VLLM_API_KEY` to a random secret. Requests to the OpenAI-compatible API must send it as a bearer token.
+
 Start with Compose:
 
 ```bash
@@ -120,7 +122,7 @@ http://<host>:8000/v1
 Run the smoke test after the model is loaded:
 
 ```bash
-./scripts/smoke-test.sh
+VLLM_API_KEY='your_vllm_api_key' ./scripts/smoke-test.sh
 ```
 
 ## Cache Placement
