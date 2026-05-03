@@ -18,6 +18,7 @@ Upstream alignment checked on 2026-05-03:
 - `scripts/hotaisle-provision-vm.sh`: Hot Aisle CLI wrapper for checking availability and provisioning a VM.
 - `scripts/use-engine.sh`: switches the single GPU between the vLLM baseline and MAX experiment.
 - `scripts/benchmark-openai.sh`: simple OpenAI-compatible completion tokens/sec benchmark.
+- `compose.sglang.yaml`: ROCm SGLang experiment on localhost port 8002.
 - `EXPERIMENTS.md`: benchmark notes and MAX compatibility findings.
 - `cloud-init/hotaisle-vllm.yaml`: VM bootstrap that installs Docker tooling and clones this repo without starting vLLM.
 - `Makefile`: small wrappers for compose config, up, logs, down, and smoke testing.
@@ -177,3 +178,25 @@ BASE_URL=http://localhost:8001 ./scripts/benchmark-openai.sh
 MAX's current supported-models page does not explicitly list `mistralai/Mistral-Medium-3.5-128B`. It lists related Mistral/Pixtral architectures, so this is a compatibility and performance experiment, not a guaranteed supported deployment path.
 
 Current result: MAX AMD nightly is not viable for this model on MI300X as of 2026-05-03. See `EXPERIMENTS.md` for the exact errors and baseline vLLM benchmark.
+
+## SGLang Experiment
+
+The SGLang experiment uses the freshest generic MI300X ROCm daily image observed on 2026-05-03:
+
+```text
+rocm/sgl-dev:v0.5.10.post1-rocm720-mi30x-20260502
+```
+
+It is isolated in `compose.sglang.yaml` and binds to `127.0.0.1:${SGLANG_PORT:-8002}`. It uses the same bearer API key as vLLM via `VLLM_API_KEY`.
+
+Switch to SGLang on the single-GPU VM:
+
+```bash
+./scripts/use-engine.sh sglang
+```
+
+Benchmark it:
+
+```bash
+BASE_URL=http://localhost:8002 VLLM_API_KEY='your_vllm_api_key' ./scripts/benchmark-openai.sh
+```

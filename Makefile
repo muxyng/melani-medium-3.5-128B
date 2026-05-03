@@ -1,13 +1,16 @@
 COMPOSE ?= docker compose
 ENV_FILE ?= .env
 
-.PHONY: config max-config up down logs smoke bench run use-vllm use-max stop-engines hotaisle-provision
+.PHONY: config max-config sglang-config up down logs smoke bench run use-vllm use-max use-sglang stop-engines hotaisle-provision
 
 config:
 	$(COMPOSE) --env-file $(ENV_FILE) config
 
 max-config:
 	$(COMPOSE) --env-file $(ENV_FILE) -f compose.max.yaml config
+
+sglang-config:
+	$(COMPOSE) --env-file $(ENV_FILE) -f compose.sglang.yaml config
 
 up:
 	$(COMPOSE) --env-file $(ENV_FILE) up -d
@@ -32,6 +35,9 @@ use-vllm:
 
 use-max:
 	./scripts/use-engine.sh max
+
+use-sglang:
+	./scripts/use-engine.sh sglang
 
 stop-engines:
 	./scripts/use-engine.sh stop
