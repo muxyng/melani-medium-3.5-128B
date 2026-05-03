@@ -14,7 +14,8 @@ if ! command -v hotaisle >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ -z "${HOTAISLE_API_TOKEN:-}" ]] && ! hotaisle config get token >/dev/null 2>&1; then
+configured_token="$(hotaisle config get token 2>/dev/null || true)"
+if [[ -z "${HOTAISLE_API_TOKEN:-}" && -z "${configured_token}" ]]; then
   echo "Set HOTAISLE_API_TOKEN, then run: hotaisle config set token" >&2
   exit 1
 fi
