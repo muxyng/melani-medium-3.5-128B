@@ -18,6 +18,7 @@ Upstream alignment checked on 2026-05-03:
 - `scripts/hotaisle-provision-vm.sh`: Hot Aisle CLI wrapper for checking availability and provisioning a VM.
 - `scripts/use-engine.sh`: switches the single GPU between the vLLM baseline and MAX experiment.
 - `scripts/benchmark-openai.sh`: simple OpenAI-compatible completion tokens/sec benchmark.
+- `EXPERIMENTS.md`: benchmark notes and MAX compatibility findings.
 - `cloud-init/hotaisle-vllm.yaml`: VM bootstrap that installs Docker tooling and clones this repo without starting vLLM.
 - `Makefile`: small wrappers for compose config, up, logs, down, and smoke testing.
 
@@ -174,3 +175,5 @@ BASE_URL=http://localhost:8001 ./scripts/benchmark-openai.sh
 ```
 
 MAX's current supported-models page does not explicitly list `mistralai/Mistral-Medium-3.5-128B`. It lists related Mistral/Pixtral architectures, so this is a compatibility and performance experiment, not a guaranteed supported deployment path.
+
+Current result: MAX AMD nightly is not viable for this model on MI300X as of 2026-05-03. See `EXPERIMENTS.md` for the exact errors and baseline vLLM benchmark.
