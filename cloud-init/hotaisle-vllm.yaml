@@ -16,7 +16,7 @@ system_info:
     groups: [docker]
 
 write_files:
-  - path: /opt/melani-medium-3.5-128B/README.next
+  - path: /opt/hotaisle-melani-medium-bootstrap/README.next
     permissions: "0644"
     content: |
       Bootstrap complete.
@@ -34,11 +34,15 @@ runcmd:
   - mkdir -p /opt
   - |
     if [ ! -d /opt/melani-medium-3.5-128B/.git ]; then
+      if [ -e /opt/melani-medium-3.5-128B ]; then
+        mv /opt/melani-medium-3.5-128B /opt/melani-medium-3.5-128B.bootstrap.$(date +%s)
+      fi
       git clone https://github.com/muxyng/melani-medium-3.5-128B.git /opt/melani-medium-3.5-128B
     else
       git -C /opt/melani-medium-3.5-128B pull --ff-only
     fi
   - cp /opt/melani-medium-3.5-128B/.env.example /opt/melani-medium-3.5-128B/.env.pending
+  - cp /opt/hotaisle-melani-medium-bootstrap/README.next /opt/melani-medium-3.5-128B/README.next
   - chmod 600 /opt/melani-medium-3.5-128B/.env.pending
   - echo "Hot Aisle bootstrap finished at $(date -Is)" > /opt/melani-medium-3.5-128B/bootstrap.done
 

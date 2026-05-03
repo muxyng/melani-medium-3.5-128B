@@ -68,12 +68,12 @@ Provision a 1x MI300X VM with the cloud-init bootstrap:
 ./scripts/hotaisle-provision-vm.sh
 ```
 
-The wrapper prints current availability first and requires typing `provision` before billing starts. It defaults to the 1x MI300X API shape: 13 CPU cores, 224 GiB RAM, 12288 GiB disk, 1x `MI300X`.
+The wrapper prints current availability first and requires typing `provision` before billing starts. It defaults to selecting by GPU shape only: 1x `MI300X`. The current API availability resolves that to 13 CPU cores, 224 GiB RAM, and about 13 TB disk.
 
 To target the 2x MI300X shape, override the sizing:
 
 ```bash
-GPU_COUNT=2 CPU_CORES=26 RAM_GB=448 ./scripts/hotaisle-provision-vm.sh
+GPU_COUNT=2 ./scripts/hotaisle-provision-vm.sh
 ```
 
 The cloud-init bootstrap intentionally does not start vLLM or download model weights. It installs Docker tooling, clones this repo to `/opt/melani-medium-3.5-128B`, and leaves `/opt/melani-medium-3.5-128B/.env.pending` for secret configuration.
