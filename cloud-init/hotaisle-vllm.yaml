@@ -1,0 +1,45 @@
+#cloud-config
+package_update: true
+packages:
+  - ca-certificates
+  - curl
+  - git
+  - jq
+  - docker.io
+  - docker-compose-plugin
+
+groups:
+  - docker
+
+system_info:
+  default_user:
+    groups: [docker]
+
+write_files:
+  - path: /opt/melani-medium-3.5-128B/README.next
+    permissions: "0644"
+    content: |
+      Bootstrap complete.
+
+      Next steps:
+      1. cd /opt/melani-medium-3.5-128B
+      2. cp .env.example .env
+      3. Set HF_TOKEN in .env
+      4. docker compose --env-file .env up -d
+
+      The bootstrap intentionally does not start vLLM or download model weights.
+
+runcmd:
+  - systemctl enable --now docker
+  - mkdir -p /opt
+  - |
+    if [ ! -d /opt/melani-medium-3.5-128B/.git ]; then
+      git clone https://github.com/muxyng/melani-medium-3.5-128B.git /opt/melani-medium-3.5-128B
+    else
+      git -C /opt/melani-medium-3.5-128B pull --ff-only
+    fi
+  - cp /opt/melani-medium-3.5-128B/.env.example /opt/melani-medium-3.5-128B/.env.pending
+  - chmod 600 /opt/melani-medium-3.5-128B/.env.pending
+  - echo "Hot Aisle bootstrap finished at $(date -Is)" > /opt/melani-medium-3.5-128B/bootstrap.done
+
+final_message: "Hot Aisle Mistral Medium vLLM bootstrap finished. Configure .env before starting Docker Compose."

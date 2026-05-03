@@ -1,7 +1,7 @@
 COMPOSE ?= docker compose
 ENV_FILE ?= .env
 
-.PHONY: config up down logs smoke run
+.PHONY: config up down logs smoke run hotaisle-provision
 
 config:
 	$(COMPOSE) --env-file $(ENV_FILE) config
@@ -20,3 +20,6 @@ smoke:
 
 run:
 	./scripts/run-vllm-rocm.sh
+
+hotaisle-provision:
+	./scripts/hotaisle-provision-vm.sh

@@ -15,6 +15,8 @@ Upstream alignment checked on 2026-05-03:
 - `.env.example`: deployment-time settings. Copy to `.env` on the MI300X host.
 - `scripts/run-vllm-rocm.sh`: direct `docker run` equivalent for hosts not using Compose.
 - `scripts/smoke-test.sh`: OpenAI-compatible API smoke test after the server is up.
+- `scripts/hotaisle-provision-vm.sh`: Hot Aisle CLI wrapper for checking availability and provisioning a VM.
+- `cloud-init/hotaisle-vllm.yaml`: VM bootstrap that installs Docker tooling and clones this repo without starting vLLM.
 - `Makefile`: small wrappers for compose config, up, logs, down, and smoke testing.
 
 ## Hardware Notes
@@ -22,6 +24,59 @@ Upstream alignment checked on 2026-05-03:
 The default configuration assumes an 8x MI300X node with `TENSOR_PARALLEL_SIZE=8`, matching the model card. The official checkpoint is FP8-quantized with BF16 model dtype metadata; this is the highest-precision artifact currently published under `mistralai/Mistral-Medium-3.5-128B`. This scaffold intentionally avoids third-party GGUFs, AWQ/GPTQ variants, or manual dtype coercion.
 
 The official model supports a 256k context window, but this deployment is configured for 32k context by default to fit the planned VM shape and reduce KV-cache pressure.
+
+## Hot Aisle CLI Provisioning
+
+Install the official Hot Aisle CLI on your workstation. On Linux AMD64, the release binary can be installed to `~/.local/bin`:
+
+```bash
+rm -rf /tmp/hotaisle-cli
+mkdir -p /tmp/hotaisle-cli
+gh release download v0.8.17 \
+  --repo hotaisle/hotaisle-cli \
+  --pattern 'hotaisle-cli-v0.8.17-linux-amd64.tar.gz' \
+  --dir /tmp/hotaisle-cli
+tar -xzf /tmp/hotaisle-cli/hotaisle-cli-v0.8.17-linux-amd64.tar.gz -C /tmp/hotaisle-cli
+install -Dm755 /tmp/hotaisle-cli/hotaisle-cli-v0.8.17-linux-amd64 ~/.local/bin/hotaisle
+hotaisle --version
+```
+
+Create an API key in the Hot Aisle admin TUI, then configure the CLI:
+
+```bash
+export HOTAISLE_API_TOKEN='hotaisle_api_key_here'
+hotaisle config set token
+hotaisle team list
+hotaisle config set default-team melani
+```
+
+Upload the SSH key used for this deployment:
+
+```bash
+hotaisle user ssh-keys add --key "$(cat ~/.ssh/hotaisle_melani_medium_2026_05_03_ed25519.pub)"
+```
+
+Check available VM types:
+
+```bash
+hotaisle vm available --team melani
+```
+
+Provision a 1x MI300X VM with the cloud-init bootstrap:
+
+```bash
+./scripts/hotaisle-provision-vm.sh
+```
+
+The wrapper prints current availability first and requires typing `provision` before billing starts. It defaults to the 1x MI300X shape shown in the Hot Aisle UI: 13 CPU cores, 224 GB RAM, 13 TB disk, 1x `MI300X`.
+
+To target the 2x MI300X shape, override the sizing:
+
+```bash
+GPU_COUNT=2 CPU_CORES=26 RAM_GB=448 ./scripts/hotaisle-provision-vm.sh
+```
+
+The cloud-init bootstrap intentionally does not start vLLM or download model weights. It installs Docker tooling, clones this repo to `/opt/melani-medium-3.5-128B`, and leaves `/opt/melani-medium-3.5-128B/.env.pending` for secret configuration.
 
 ## Deployment
 
