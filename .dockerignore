@@ -1,0 +1,5 @@
+.env
+.git
+.hf-cache
+hf-cache
+*.log

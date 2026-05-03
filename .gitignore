@@ -1,0 +1,5 @@
+.env
+.hf-cache/
+hf-cache/
+*.log
+__pycache__/
