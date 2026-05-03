@@ -39,8 +39,6 @@ services:
       - ${MAX_NUM_SEQS:-4}
       - --device-memory-utilization
       - ${GPU_MEMORY_UTILIZATION:-0.80}
-      - --quantization-encoding
-      - float8_e4m3fn
 
 volumes:
   hf-cache:
