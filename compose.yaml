@@ -38,10 +38,8 @@ services:
       - ${SERVED_MODEL_NAME:-mistral-medium-3.5-128b}
       - --download-dir
       - /models/huggingface
-      - --dtype
-      - bfloat16
       - --max-model-len
-      - ${MAX_MODEL_LEN:-262144}
+      - ${MAX_MODEL_LEN:-32768}
       - --gpu-memory-utilization
       - ${GPU_MEMORY_UTILIZATION:-0.80}
       - --max-num-batched-tokens

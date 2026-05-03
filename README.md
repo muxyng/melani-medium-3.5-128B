@@ -5,6 +5,7 @@ This repository is a weightless deployment scaffold for `mistralai/Mistral-Mediu
 Upstream alignment checked on 2026-05-03:
 
 - Mistral's model card recommends vLLM nightly, tensor parallel size 8, Mistral tool parsing, Mistral reasoning parsing, `max_num_batched_tokens=16384`, `max_num_seqs=128`, and `gpu_memory_utilization=0.8`: https://huggingface.co/mistralai/Mistral-Medium-3.5-128B
+- The official Hugging Face `config.json` publishes this checkpoint with `quant_method: fp8` and `dtype: bfloat16`. This scaffold does not pass `--dtype`; vLLM loads the official checkpoint metadata as-is: https://huggingface.co/mistralai/Mistral-Medium-3.5-128B/raw/main/config.json
 - vLLM's ROCm documentation recommends the official `vllm/vllm-openai-rocm:nightly` image and notes AMD's older `rocm/vllm` images are deprecated: https://docs.vllm.ai/en/latest/getting_started/installation/gpu/?device=rocm
 - Mistral's vLLM deployment guide uses `HF_TOKEN`/`HUGGING_FACE_HUB_TOKEN` and Mistral tokenizer/config/load formats for local vLLM serving: https://docs.mistral.ai/models/deployment/local-deployment/vllm
 
@@ -18,7 +19,9 @@ Upstream alignment checked on 2026-05-03:
 
 ## Hardware Notes
 
-The default configuration assumes an 8x MI300X node with `TENSOR_PARALLEL_SIZE=8`, matching the model card. This is a dense 128B model with a 256k context window; full precision serving is not a realistic single-MI300X target. For fewer GPUs, expect to lower context/concurrency significantly or use a validated quantized serving path.
+The default configuration assumes an 8x MI300X node with `TENSOR_PARALLEL_SIZE=8`, matching the model card. The official checkpoint is FP8-quantized with BF16 model dtype metadata; this is the highest-precision artifact currently published under `mistralai/Mistral-Medium-3.5-128B`. This scaffold intentionally avoids third-party GGUFs, AWQ/GPTQ variants, or manual dtype coercion.
+
+The official model supports a 256k context window, but this deployment is configured for 32k context by default to fit the planned VM shape and reduce KV-cache pressure.
 
 ## Deployment
 
@@ -71,7 +74,7 @@ This keeps downloads out of the repository while letting the deployment host reu
 
 ## Useful Runtime Knobs
 
-- `MAX_MODEL_LEN=262144`: full 256k context. Lower it if KV cache pressure is too high.
+- `MAX_MODEL_LEN=32768`: 32k context for the planned VM deployment. The official model supports 256k if the GPU allocation can sustain it.
 - `MAX_NUM_BATCHED_TOKENS=16384`: model-card recommended batching default.
 - `MAX_NUM_SEQS=128`: model-card recommended sequence concurrency default.
 - `GPU_MEMORY_UTILIZATION=0.80`: model-card recommended starting point.
