@@ -16,7 +16,7 @@ Upstream alignment checked on 2026-05-03:
 - `scripts/run-vllm-rocm.sh`: direct `docker run` equivalent for hosts not using Compose.
 - `scripts/smoke-test.sh`: OpenAI-compatible API smoke test after the server is up.
 - `scripts/hotaisle-provision-vm.sh`: Hot Aisle CLI wrapper for checking availability and provisioning a VM.
-- `scripts/use-engine.sh`: switches the single GPU between the vLLM baseline and MAX experiment.
+- `scripts/use-engine.sh`: switches the single GPU between the vLLM baseline, MAX experiment, and SGLang experiment.
 - `scripts/benchmark-openai.sh`: simple OpenAI-compatible completion tokens/sec benchmark.
 - `compose.sglang.yaml`: ROCm SGLang experiment on localhost port 8002.
 - `EXPERIMENTS.md`: benchmark notes and MAX compatibility findings.
@@ -165,6 +165,7 @@ Switch engines on a single-GPU VM:
 ```bash
 ./scripts/use-engine.sh vllm
 ./scripts/use-engine.sh max
+./scripts/use-engine.sh sglang
 ./scripts/use-engine.sh stop
 ```
 
@@ -200,3 +201,5 @@ Benchmark it:
 ```bash
 BASE_URL=http://localhost:8002 VLLM_API_KEY='your_vllm_api_key' ./scripts/benchmark-openai.sh
 ```
+
+Current result: SGLang ROCm nightly is not viable for this model on the current 1x MI300X VM as of 2026-05-03. It OOMs during FP8 weight initialization even with 4k context and heavy CPU offload. See `EXPERIMENTS.md` for the tested settings.

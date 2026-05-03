@@ -59,3 +59,27 @@ constraint failed: MMA shape requires CDNA4 or newer
 ```
 
 The provisioned Hot Aisle MI300X reports `gfx942`, which is CDNA3. That means the tested MAX nightly currently wants a newer AMD architecture for this Mistral3 attention shape, so it cannot provide a performance comparison on MI300X yet.
+
+## SGLang ROCm Nightly Probe
+
+Date: 2026-05-03
+
+Image: `rocm/sgl-dev:v0.5.10.post1-rocm720-mi30x-20260502`
+
+Result: not viable for this model on the current 1x MI300X VM in the tested nightly.
+
+Findings:
+
+- The default 32k-context Compose launch detected the official FP8 checkpoint, then OOMed during model initialization before serving `/v1/models`.
+- A constrained 4k-context launch with `--mem-fraction-static 0.20`, `--max-running-requests 1`, `--max-total-tokens 4096`, `--chunked-prefill-size 1024`, `--max-prefill-tokens 1024`, and `--disable-cuda-graph` still OOMed while creating FP8 layer weights.
+- `--enable-memory-saver` is exposed in this SGLang nightly, but the image does not include `torch-memory-saver`, so that path fails before model load.
+- CPU offload did not rescue the single-GPU run. Both `--cpu-offload-gb 8` and `--cpu-offload-gb 32` still OOMed during FP8 weight allocation.
+
+Representative error:
+
+```text
+torch.OutOfMemoryError: HIP out of memory. Tried to allocate 672.00 MiB.
+GPU 0 has a total capacity of 191.69 GiB ... 190.86 GiB is allocated by PyTorch
+```
+
+Because SGLang never reached a ready OpenAI-compatible endpoint, no tokens/sec benchmark was collected. vLLM remains the only tested engine that serves this checkpoint on the single MI300X VM with the desired 32k context.

@@ -8,6 +8,8 @@ RUNS="${RUNS:-3}"
 WARMUP_TOKENS="${WARMUP_TOKENS:-64}"
 API_KEY="${VLLM_API_KEY:-${OPENAI_API_KEY:-}}"
 
+export BASE_URL MODEL MAX_TOKENS RUNS WARMUP_TOKENS API_KEY
+
 python3 - <<'PY'
 import json
 import os
