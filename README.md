@@ -16,6 +16,8 @@ Upstream alignment checked on 2026-05-03:
 - `scripts/run-vllm-rocm.sh`: direct `docker run` equivalent for hosts not using Compose.
 - `scripts/smoke-test.sh`: OpenAI-compatible API smoke test after the server is up.
 - `scripts/hotaisle-provision-vm.sh`: Hot Aisle CLI wrapper for checking availability and provisioning a VM.
+- `scripts/use-engine.sh`: switches the single GPU between the vLLM baseline and MAX experiment.
+- `scripts/benchmark-openai.sh`: simple OpenAI-compatible completion tokens/sec benchmark.
 - `cloud-init/hotaisle-vllm.yaml`: VM bootstrap that installs Docker tooling and clones this repo without starting vLLM.
 - `Makefile`: small wrappers for compose config, up, logs, down, and smoke testing.
 
@@ -145,3 +147,30 @@ This keeps downloads out of the repository while letting the deployment host reu
 - `TENSOR_PARALLEL_SIZE`: should generally match the number of GPUs used by this model. The single-MI300X default is `1`; the model card's multi-GPU example uses `8`.
 
 Because `VLLM_IMAGE` points to a nightly tag and Compose uses `pull_policy: always`, deployment will pick up the latest vLLM ROCm nightly each time the image is pulled. Pin an image digest only if you need reproducibility over freshness.
+
+## MAX Experiment
+
+The MAX experiment uses Modular's AMD nightly container:
+
+```text
+modular/max-amd:nightly
+```
+
+On 2026-05-03 Docker Hub also listed the concrete nightly tag `26.4.0.dev2026050306`. The experiment is isolated in `compose.max.yaml` and binds to `127.0.0.1:${MAX_PORT:-8001}` because MAX's quickstart endpoint is OpenAI-compatible but does not document an API-key flag like vLLM's `--api-key`.
+
+Switch engines on a single-GPU VM:
+
+```bash
+./scripts/use-engine.sh vllm
+./scripts/use-engine.sh max
+./scripts/use-engine.sh stop
+```
+
+Benchmark whichever OpenAI-compatible endpoint is active:
+
+```bash
+BASE_URL=http://localhost:8000 VLLM_API_KEY='your_vllm_api_key' ./scripts/benchmark-openai.sh
+BASE_URL=http://localhost:8001 ./scripts/benchmark-openai.sh
+```
+
+MAX's current supported-models page does not explicitly list `mistralai/Mistral-Medium-3.5-128B`. It lists related Mistral/Pixtral architectures, so this is a compatibility and performance experiment, not a guaranteed supported deployment path.
