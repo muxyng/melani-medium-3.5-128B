@@ -24,8 +24,8 @@ services:
       HF_HOME: /models/huggingface
       HF_HUB_CACHE: /models/huggingface/hub
       VLLM_CACHE_ROOT: /models/huggingface/vllm
-      ROCR_VISIBLE_DEVICES: ${ROCR_VISIBLE_DEVICES:-0,1,2,3,4,5,6,7}
-      HIP_VISIBLE_DEVICES: ${HIP_VISIBLE_DEVICES:-0,1,2,3,4,5,6,7}
+      ROCR_VISIBLE_DEVICES: ${ROCR_VISIBLE_DEVICES:-0}
+      HIP_VISIBLE_DEVICES: ${HIP_VISIBLE_DEVICES:-0}
       PYTORCH_HIP_ALLOC_CONF: ${PYTORCH_HIP_ALLOC_CONF:-expandable_segments:True}
     command:
       - --host
@@ -43,11 +43,11 @@ services:
       - --gpu-memory-utilization
       - ${GPU_MEMORY_UTILIZATION:-0.80}
       - --max-num-batched-tokens
-      - ${MAX_NUM_BATCHED_TOKENS:-16384}
+      - ${MAX_NUM_BATCHED_TOKENS:-8192}
       - --max-num-seqs
-      - ${MAX_NUM_SEQS:-128}
+      - ${MAX_NUM_SEQS:-4}
       - --tensor-parallel-size
-      - ${TENSOR_PARALLEL_SIZE:-8}
+      - ${TENSOR_PARALLEL_SIZE:-1}
       - --config-format
       - mistral
       - --load-format

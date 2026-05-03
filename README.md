@@ -21,7 +21,7 @@ Upstream alignment checked on 2026-05-03:
 
 ## Hardware Notes
 
-The default configuration assumes an 8x MI300X node with `TENSOR_PARALLEL_SIZE=8`, matching the model card. The official checkpoint is FP8-quantized with BF16 model dtype metadata; this is the highest-precision artifact currently published under `mistralai/Mistral-Medium-3.5-128B`. This scaffold intentionally avoids third-party GGUFs, AWQ/GPTQ variants, or manual dtype coercion.
+The default configuration targets a 1x MI300X VM with `TENSOR_PARALLEL_SIZE=1`, 32k context, and conservative concurrency. The official model card also documents an 8x MI300X style deployment with `TENSOR_PARALLEL_SIZE=8`; use that shape for higher throughput or the full recommended serving profile. The official checkpoint is FP8-quantized with BF16 model dtype metadata; this is the highest-precision artifact currently published under `mistralai/Mistral-Medium-3.5-128B`. This scaffold intentionally avoids third-party GGUFs, AWQ/GPTQ variants, or manual dtype coercion.
 
 The official model supports a 256k context window, but this deployment is configured for 32k context by default to fit the planned VM shape and reduce KV-cache pressure.
 
@@ -68,7 +68,7 @@ Provision a 1x MI300X VM with the cloud-init bootstrap:
 ./scripts/hotaisle-provision-vm.sh
 ```
 
-The wrapper prints current availability first and requires typing `provision` before billing starts. It defaults to the 1x MI300X shape shown in the Hot Aisle UI: 13 CPU cores, 224 GB RAM, 13 TB disk, 1x `MI300X`.
+The wrapper prints current availability first and requires typing `provision` before billing starts. It defaults to the 1x MI300X API shape: 13 CPU cores, 224 GiB RAM, 12288 GiB disk, 1x `MI300X`.
 
 To target the 2x MI300X shape, override the sizing:
 
@@ -136,10 +136,10 @@ This keeps downloads out of the repository while letting the deployment host reu
 ## Useful Runtime Knobs
 
 - `MAX_MODEL_LEN=32768`: 32k context for the planned VM deployment. The official model supports 256k if the GPU allocation can sustain it.
-- `MAX_NUM_BATCHED_TOKENS=16384`: model-card recommended batching default.
-- `MAX_NUM_SEQS=128`: model-card recommended sequence concurrency default.
+- `MAX_NUM_BATCHED_TOKENS=8192`: conservative single-GPU batching default.
+- `MAX_NUM_SEQS=4`: conservative single-GPU sequence concurrency default.
 - `GPU_MEMORY_UTILIZATION=0.80`: model-card recommended starting point.
 - `ROCR_VISIBLE_DEVICES` and `HIP_VISIBLE_DEVICES`: select AMD GPU IDs.
-- `TENSOR_PARALLEL_SIZE`: should generally match the number of GPUs used by this model.
+- `TENSOR_PARALLEL_SIZE`: should generally match the number of GPUs used by this model. The single-MI300X default is `1`; the model card's multi-GPU example uses `8`.
 
 Because `VLLM_IMAGE` points to a nightly tag and Compose uses `pull_policy: always`, deployment will pick up the latest vLLM ROCm nightly each time the image is pulled. Pin an image digest only if you need reproducibility over freshness.
